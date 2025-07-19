@@ -12,14 +12,14 @@ class DadosTesteSeeder extends Seeder
     {
         $evento = new Evento();
         $evento->nome = "Workshop Laravel";
-        $evento->descricao = "Curso básico de Laravel";
+        $evento->descricao = "Curso de Laravel";
         $evento->data_evento = "2025-02-01";
         $evento->local = "IFMS Campo Grande";
         $evento->save();
 
         $participante = new Participante();
-        $participante->nome = "João Silva";
-        $participante->email = "joao@email.com";
+        $participante->nome = "Ana Carolina";
+        $participante->email = "ana@email.com";
         $participante->telefone = "(67) 99999-9999";
         $participante->evento_id = 1;
         $participante->save();

@@ -1,16 +1,10 @@
 <nav class="bg-gray-900 shadow-lg">
     <div class="container mx-auto px-4">
         <div class="flex justify-between items-center py-4">
-    <a href="/painel" class="hover:text-yellow-400 transition-colors">
-        <div class="flex items-center">
-            <div class="flex items-center justify-center mr-2">
-                <i class="fas fa-calendar-check text-white text-2xl"></i>
-            </div>
-            <div class="flex items-center">
-                <span class="font-titulo text-3xl text-white font-bold">Evenza</span>
-            </div>
-        </div>
-    </a>
+                <a href="{{ route('site') }}" class="flex items-center text-white text-2xl font-bold">
+                    <i class="fas fa-calendar-check mr-2"></i>
+                    Evenza
+                </a>
             <div class="hidden md:flex space-x-6">
                 <a href="/painel" class="text-white hover:text-yellow-400 transition-colors font-medium flex items-center">
                     <i class="fas fa-tachometer-alt mr-2"></i> Painel
