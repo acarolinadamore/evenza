@@ -297,6 +297,7 @@
             referrerpolicy="no-referrer-when-downgrade"
             title="Localização Evenza - Av. Brasil Central, 477, Campo Grande MS">
         </iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d119631.31151286111!2d-54.73645003021432!3d-20.445531602762436!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sifms!5e0!3m2!1spt-BR!2sbr!4v1753228740672!5m2!1spt-BR!2sbr" class="w-full h-full border-0" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </section>
 
     <footer class="bg-gray-900 text-white py-8">

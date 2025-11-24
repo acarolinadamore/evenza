@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Yesteryear&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -31,25 +32,67 @@
 <body class="bg-gray-50">
     <x-menu />
 
+    <!-- Toast Container -->
+    <div x-data="{ show: false, message: '', type: '' }"
+         x-init="
+            @if(session('sucesso'))
+                message = '{{ session('sucesso') }}';
+                type = 'success';
+                show = true;
+                setTimeout(() => show = false, 4000);
+            @elseif(session('erro'))
+                message = '{{ session('erro') }}';
+                type = 'error';
+                show = true;
+                setTimeout(() => show = false, 4000);
+            @endif
+         "
+         x-show="show"
+         x-transition:enter="transform ease-out duration-300 transition"
+         x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+         x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed top-4 right-4 z-50 max-w-sm w-full"
+         style="display: none;">
+        <div class="rounded-lg shadow-lg overflow-hidden"
+             :class="{
+                'bg-green-50 border-l-4 border-green-500': type === 'success',
+                'bg-red-50 border-l-4 border-red-500': type === 'error'
+             }">
+            <div class="p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas text-lg"
+                           :class="{
+                               'fa-check-circle text-green-500': type === 'success',
+                               'fa-exclamation-circle text-red-500': type === 'error'
+                           }"></i>
+                    </div>
+                    <div class="ml-3 w-0 flex-1 pt-0.5">
+                        <p class="text-sm font-medium"
+                           :class="{
+                               'text-green-900': type === 'success',
+                               'text-red-900': type === 'error'
+                           }"
+                           x-text="message"></p>
+                    </div>
+                    <div class="ml-4 flex-shrink-0 flex">
+                        <button @click="show = false" class="inline-flex rounded-md focus:outline-none focus:ring-2"
+                                :class="{
+                                    'text-green-500 hover:text-green-600': type === 'success',
+                                    'text-red-500 hover:text-red-600': type === 'error'
+                                }">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main class="container mx-auto px-4 py-8">
-        @if(session('sucesso'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 shadow-sm">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle mr-3"></i>
-                    <span>{{ session('sucesso') }}</span>
-                </div>
-            </div>
-        @endif
-
-        @if(session('erro'))
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 shadow-sm">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle mr-3"></i>
-                    <span>{{ session('erro') }}</span>
-                </div>
-            </div>
-        @endif
-
         @yield('conteudo')
     </main>
 
