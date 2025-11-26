@@ -6,19 +6,44 @@
     @endisset
 
     <div>
-        <label for="nome" class="block text-sm font-medium text-gray-700 mb-2">Nome do Evento *</label>
+        <label for="nome" class="block text-sm font-medium text-gray-700 mb-2">Nome do Evento <span class="text-red-600">*</span></label>
         <input type="text"
                @isset($evento->nome) value="{{ $evento->nome }}" @endisset
                id="nome" name="nome"
                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
-               placeholder="Digite o nome do evento" required>
+               placeholder="" required>
     </div>
 
     <div>
-        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+        <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">
+            Link da Landing Page <span class="text-gray-400 font-normal">(gerado automaticamente)</span>
+        </label>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500">{{ url('/') }}/</span>
+            <input type="text"
+                   @isset($evento->slug) value="{{ $evento->slug }}" @endisset
+                   id="slug" name="slug"
+                   class="flex-1 h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+                   placeholder="">
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+            <i class="fas fa-info-circle mr-1"></i>O link será gerado automaticamente baseado no nome do evento. Você pode editá-lo se desejar.
+        </p>
+        <p id="slug-error" class="text-xs text-red-600 mt-1 hidden">
+            <i class="fas fa-exclamation-circle mr-1"></i>Este link já está em uso. Por favor, escolha outro.
+        </p>
+        <p id="slug-success" class="text-xs text-green-600 mt-1 hidden">
+            <i class="fas fa-check-circle mr-1"></i>Este link está disponível.
+        </p>
+    </div>
+
+    <div>
+        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-2">
+            Descrição <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
         <textarea id="descricao" name="descricao" rows="3"
                   class="flex w-full px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Descreva o evento (opcional)">@isset($evento->descricao){{ $evento->descricao }}@endisset</textarea>
+                  placeholder="">@isset($evento->descricao){{ $evento->descricao }}@endisset</textarea>
     </div>
 
     <div x-data="{
@@ -93,6 +118,46 @@
             let formattedYear = date.getFullYear();
             return `${formattedYear}-${formattedMonthInNumber}-${formattedDate}`;
         },
+        handleManualDateInput(event) {
+            let input = event.target.value;
+            // Remove non-numeric characters except /
+            input = input.replace(/[^\d\/]/g, '');
+
+            // Auto-format as user types: dd/mm/yyyy
+            if (input.length === 2 && !input.includes('/')) {
+                input = input + '/';
+            } else if (input.length === 5 && input.split('/').length === 2) {
+                input = input + '/';
+            }
+
+            // Limit to 10 characters (dd/mm/yyyy)
+            if (input.length > 10) {
+                input = input.substring(0, 10);
+            }
+
+            this.datePickerValue = input;
+
+            // Try to parse the date if it's complete (dd/mm/yyyy)
+            if (input.length === 10) {
+                const parts = input.split('/');
+                if (parts.length === 3) {
+                    const day = parseInt(parts[0]);
+                    const month = parseInt(parts[1]) - 1; // JS months are 0-indexed
+                    const year = parseInt(parts[2]);
+
+                    // Validate the date
+                    const date = new Date(year, month, day);
+                    if (date.getDate() === day && date.getMonth() === month && date.getFullYear() === year) {
+                        this.datePickerDay = day;
+                        this.datePickerMonth = month;
+                        this.datePickerYear = year;
+                        this.datePickerValueForInput = this.datePickerFormatDateForInput(date);
+                        this.datePickerValue = this.datePickerFormatDate(date);
+                        this.datePickerCalculateDays();
+                    }
+                }
+            }
+        },
     }" x-init="
         currentDate = new Date();
         if (datePickerValueForInput) {
@@ -110,8 +175,9 @@
         <div class="relative">
             <input x-ref="datePickerInput" type="text" @click="datePickerOpen=!datePickerOpen"
                 x-model="datePickerValue" x-on:keydown.escape="datePickerOpen=false"
+                @input="handleManualDateInput($event)"
                 class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="Selecione a data" readonly />
+                placeholder="dd/mm/aaaa ou clique para selecionar" />
             <input type="hidden" name="data_evento" x-model="datePickerValueForInput">
             <div @click="datePickerOpen=!datePickerOpen; if(datePickerOpen){ $refs.datePickerInput.focus() }"
                 class="absolute top-0 right-0 px-3 py-2 cursor-pointer text-neutral-400 hover:text-neutral-500">
@@ -169,57 +235,314 @@
     </div>
 
     <div>
-        <label for="local" class="block text-sm font-medium text-gray-700 mb-2">Local</label>
+        <label for="local" class="block text-sm font-medium text-gray-700 mb-2">
+            Local <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
         <input type="text"
                @isset($evento->local) value="{{ $evento->local }}" @endisset
                id="local" name="local"
                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
-               placeholder="Local do evento (opcional)">
+               placeholder="">
     </div>
 
     <div>
-        <label for="valor_ingresso" class="block text-sm font-medium text-gray-700 mb-2">Valor do Ingresso (R$)</label>
+        <label for="endereco" class="block text-sm font-medium text-gray-700 mb-2">
+            Endereço <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <input type="text"
+               @isset($evento->endereco) value="{{ $evento->endereco }}" @endisset
+               id="endereco" name="endereco"
+               class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+               placeholder=""
+               autocomplete="off">
+        <p class="text-xs text-gray-500 mt-1">
+            <i class="fas fa-info-circle mr-1"></i>Digite o endereço completo ou nome do estabelecimento
+        </p>
+    </div>
+
+
+    <div>
+        <label for="hora_evento" class="block text-sm font-medium text-gray-700 mb-2">
+            Hora do Evento <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <input type="time"
+               @isset($evento->hora_evento) value="{{ $evento->hora_evento }}" @endisset
+               id="hora_evento" name="hora_evento"
+               class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+               placeholder="">
+    </div>
+
+    <div>
+        <label for="valor_ingresso" class="block text-sm font-medium text-gray-700 mb-2">
+            Valor do Ingresso (R$) <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
         <input type="number"
                @isset($evento->valor_ingresso) value="{{ $evento->valor_ingresso }}" @endisset
                id="valor_ingresso" name="valor_ingresso"
                step="0.01" min="0"
                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
-               placeholder="0.00 (opcional - deixe vazio para eventos gratuitos)">
+               placeholder="">
     </div>
 
     <div>
-        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status do Evento *</label>
-        <select id="status" name="status" required
-                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50">
-            <option value="rascunho" @isset($evento->status) @if($evento->status == 'rascunho') selected @endif @endisset>
-                Rascunho - Criado mas não publicado
-            </option>
-            <option value="em_andamento" @isset($evento->status) @if($evento->status == 'em_andamento') selected @endif @endisset>
-                Em Andamento - Publicado e aceitando inscrições
-            </option>
-            <option value="concluido" @isset($evento->status) @if($evento->status == 'concluido') selected @endif @endisset>
-                Concluído - Evento já aconteceu
-            </option>
-        </select>
+        <label for="custo_por_pessoa" class="block text-sm font-medium text-gray-700 mb-2">
+            Custo por Pessoa (R$) <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <input type="number"
+               @isset($evento->custo_por_pessoa) value="{{ $evento->custo_por_pessoa }}" @endisset
+               id="custo_por_pessoa" name="custo_por_pessoa"
+               step="0.01" min="0"
+               class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+               placeholder="">
+        <p class="text-xs text-gray-500 mt-1">Custo estimado do evento por participante</p>
     </div>
 
     <div>
-        <label for="capacidade" class="block text-sm font-medium text-gray-700 mb-2">Evento para quantas pessoas?</label>
+        <label for="capacidade" class="block text-sm font-medium text-gray-700 mb-2">
+            Evento para quantas pessoas? <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
         <input type="number"
                @isset($evento->capacidade) value="{{ $evento->capacidade }}" @endisset
                id="capacidade" name="capacidade"
                min="1"
                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
-               placeholder="Ex: 50 (deixe vazio para sem limite)">
+               placeholder="">
         <p class="text-xs text-gray-500 mt-1">Número máximo de participantes que podem se inscrever</p>
     </div>
 
-    <div class="flex gap-4">
-        <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 rounded-md bg-neutral-950 hover:bg-neutral-900 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none">
-            {{ $submit }}
-        </button>
+    <div>
+        <label for="whatsapp_oficial" class="block text-sm font-medium text-gray-700 mb-2">
+            WhatsApp Oficial <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <input type="text"
+               @isset($evento->whatsapp_oficial) value="{{ $evento->whatsapp_oficial }}" @endisset
+               id="whatsapp_oficial" name="whatsapp_oficial"
+               class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+               placeholder="">
+        <p class="text-xs text-gray-500 mt-1">Número de WhatsApp para contato sobre o evento</p>
+    </div>
+
+    <div>
+        <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-2">
+            Observações <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <textarea id="observacoes" name="observacoes" rows="4"
+                  class="flex w-full px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="">@isset($evento->observacoes){{ $evento->observacoes }}@endisset</textarea>
+    </div>
+
+    <div>
+        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status do Evento <span class="text-red-600">*</span></label>
+        <select id="status" name="status" required
+                class="flex w-full h-10 px-4 pr-12 py-2 text-sm bg-white border rounded-lg border-gray-300 ring-offset-background placeholder:text-gray-500 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:cursor-not-allowed disabled:opacity-50 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-[length:1.2em] bg-[right_0.7rem_center] bg-no-repeat hover:border-gray-400 transition-colors">
+            <option value="rascunho" @isset($evento->status) @if($evento->status == 'rascunho') selected @endif @endisset>
+                Rascunho
+            </option>
+            <option value="publicado" @isset($evento->status) @if($evento->status == 'publicado') selected @endif @endisset>
+                Publicado
+            </option>
+            <option value="inscricoes_encerradas" @isset($evento->status) @if($evento->status == 'inscricoes_encerradas') selected @endif @endisset>
+                Inscrições Encerradas
+            </option>
+            <option value="finalizado" @isset($evento->status) @if($evento->status == 'finalizado') selected @endif @endisset>
+                Finalizado
+            </option>
+            <option value="cancelado" @isset($evento->status) @if($evento->status == 'cancelado') selected @endif @endisset>
+                Cancelado
+            </option>
+        </select>
+    </div>
+
+    <div class="flex gap-4 justify-end">
         <a href="/eventos" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 rounded-md bg-neutral-500 hover:bg-neutral-600 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-600 focus:shadow-outline focus:outline-none">
             Cancelar
         </a>
+        <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 rounded-md bg-neutral-950 hover:bg-neutral-900 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none">
+            {{ $submit }}
+        </button>
     </div>
 </form>
+
+<script>
+    // Google Places Autocomplete
+    console.log('Autocomplete script loaded');
+
+    function initEventoAutocomplete() {
+        console.log('Initializing autocomplete...');
+
+        const enderecoInput = document.getElementById('endereco');
+        const localInput = document.getElementById('local');
+
+        console.log('Endereco input:', enderecoInput);
+        console.log('Local input:', localInput);
+
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            console.log('Google Maps API loaded successfully');
+
+            try {
+                // Initialize autocomplete for endereco field
+                const autocomplete = new google.maps.places.Autocomplete(enderecoInput, {
+                    componentRestrictions: { country: 'br' },
+                    fields: ['formatted_address', 'name', 'geometry']
+                });
+                console.log('Endereco autocomplete initialized');
+
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    console.log('Place selected for endereco:', place);
+
+                    if (place.formatted_address) {
+                        enderecoInput.value = place.formatted_address;
+                    }
+                    if (place.name && !localInput.value) {
+                        localInput.value = place.name;
+                    }
+                });
+
+                // Initialize autocomplete for local field (for establishment names)
+                const localAutocomplete = new google.maps.places.Autocomplete(localInput, {
+                    componentRestrictions: { country: 'br' },
+                    types: ['establishment'],
+                    fields: ['name', 'formatted_address', 'geometry']
+                });
+                console.log('Local autocomplete initialized');
+
+                localAutocomplete.addListener('place_changed', function() {
+                    const place = localAutocomplete.getPlace();
+                    console.log('Place selected for local:', place);
+
+                    if (place.name) {
+                        localInput.value = place.name;
+                    }
+                    if (place.formatted_address && !enderecoInput.value) {
+                        enderecoInput.value = place.formatted_address;
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing autocomplete:', error);
+            }
+        } else {
+            console.warn('Google Maps API not loaded yet. Retrying in 500ms...');
+            setTimeout(initEventoAutocomplete, 500);
+        }
+    }
+
+    // Initialize when page is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing autocomplete');
+            initEventoAutocomplete();
+        });
+    } else {
+        console.log('DOM already loaded, initializing autocomplete now');
+        initEventoAutocomplete();
+    }
+</script>
+
+<script>
+    // Geração automática e validação de slug
+    const nomeInput = document.getElementById('nome');
+    const slugInput = document.getElementById('slug');
+    const slugError = document.getElementById('slug-error');
+    const slugSuccess = document.getElementById('slug-success');
+    const eventoId = document.querySelector('input[name="id"]')?.value || null;
+
+    let slugCheckTimeout = null;
+    let manualSlugEdit = false;
+
+    // Função para converter texto em slug
+    function gerarSlug(texto) {
+        return texto
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+            .replace(/[^\w\s-]/g, '') // Remove caracteres especiais
+            .replace(/\s+/g, '-') // Substitui espaços por hífens
+            .replace(/-+/g, '-') // Remove hífens duplicados
+            .replace(/^-+|-+$/g, ''); // Remove hífens do início e fim
+    }
+
+    // Função para verificar se o slug já existe
+    async function verificarSlug(slug) {
+        if (!slug) {
+            slugError.classList.add('hidden');
+            slugSuccess.classList.add('hidden');
+            return;
+        }
+
+        try {
+            const url = new URL('{{ route("eventos.verificar-slug") }}');
+            url.searchParams.append('slug', slug);
+            if (eventoId) {
+                url.searchParams.append('evento_id', eventoId);
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.existe) {
+                slugError.classList.remove('hidden');
+                slugSuccess.classList.add('hidden');
+                slugInput.classList.add('border-red-500');
+                slugInput.classList.remove('border-green-500');
+            } else {
+                slugError.classList.add('hidden');
+                slugSuccess.classList.remove('hidden');
+                slugInput.classList.remove('border-red-500');
+                slugInput.classList.add('border-green-500');
+            }
+        } catch (error) {
+            console.error('Erro ao verificar slug:', error);
+        }
+    }
+
+    // Quando o nome do evento mudar, gerar slug automaticamente (se não foi editado manualmente)
+    nomeInput.addEventListener('input', function() {
+        if (!manualSlugEdit) {
+            const novoSlug = gerarSlug(this.value);
+            slugInput.value = novoSlug;
+
+            // Limpar timeout anterior
+            if (slugCheckTimeout) {
+                clearTimeout(slugCheckTimeout);
+            }
+
+            // Verificar slug após 500ms sem digitar
+            slugCheckTimeout = setTimeout(() => {
+                verificarSlug(novoSlug);
+            }, 500);
+        }
+    });
+
+    // Quando o slug for editado manualmente
+    slugInput.addEventListener('input', function() {
+        manualSlugEdit = true;
+        const slug = gerarSlug(this.value);
+        this.value = slug;
+
+        // Limpar timeout anterior
+        if (slugCheckTimeout) {
+            clearTimeout(slugCheckTimeout);
+        }
+
+        // Verificar slug após 500ms sem digitar
+        slugCheckTimeout = setTimeout(() => {
+            verificarSlug(slug);
+        }, 500);
+    });
+
+    // Verificar slug inicial se estiver editando
+    if (slugInput.value) {
+        manualSlugEdit = true;
+        verificarSlug(slugInput.value);
+    }
+
+    // Prevenir submissão do formulário se o slug já existir
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!slugError.classList.contains('hidden')) {
+            e.preventDefault();
+            alert('O link da landing page já está em uso. Por favor, escolha outro.');
+            slugInput.focus();
+        }
+    });
+</script>

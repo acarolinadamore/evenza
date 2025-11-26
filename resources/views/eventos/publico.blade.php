@@ -22,14 +22,68 @@
         .border-destaque { border-color: var(--cor-destaque); }
         .hover\:bg-destaque:hover { background-color: var(--cor-destaque); }
 
-        @if($evento->tema->imagem_fundo)
-        .hero-section {
-            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ asset('storage/' . $evento->tema->imagem_fundo) }}');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+        /* Estilos para modo de edição */
+        .edit-mode .bloco-secao {
+            position: relative;
+            cursor: move;
+            transition: all 0.3s ease;
         }
-        @endif
+
+        .edit-mode .bloco-secao:hover {
+            outline: 3px dashed #3b82f6;
+            outline-offset: 4px;
+        }
+
+        .edit-mode .bloco-handle {
+            display: flex !important;
+        }
+
+        .edit-mode .component-handle {
+            display: inline-block !important;
+        }
+
+        .edit-mode .hero-component {
+            cursor: move;
+            padding: 12px;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .edit-mode .hero-component:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .hero-component.sortable-ghost {
+            opacity: 0.4;
+        }
+
+        .bloco-handle {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(59, 130, 246, 0.95);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #e0e7ff;
+        }
+
+        .sortable-drag {
+            opacity: 0.8;
+        }
     </style>
     @endif
 </head>
@@ -64,60 +118,123 @@
     </div>
     @endif
 
-    <!-- Header com Logo -->
-    @if($evento->tema && $evento->tema->logo)
-    <header class="bg-white shadow-sm sticky top-0 z-40">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <img src="{{ asset('storage/' . $evento->tema->logo) }}" alt="{{ $evento->nome }}" class="h-12">
-            <button @click="copiarLink()" class="text-sm bg-destaque text-white px-4 py-2 rounded-lg hover:opacity-90">
-                <i class="fas fa-link mr-2"></i>Copiar Link
-            </button>
-        </div>
-    </header>
-    @endif
+    <!-- Botão de Modo de Edição (Flutuante) -->
+    <button id="toggleEditMode"
+            class="fixed bottom-24 left-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg hover:bg-blue-700 transition-all z-50 flex items-center justify-center"
+            onclick="toggleEditMode()"
+            title="Ativar modo de edição">
+        <i class="fas fa-edit text-xl"></i>
+    </button>
 
+    <!-- Container de Blocos (para drag and drop) -->
+    <div id="blocos-container">
     <!-- Blocos de Conteúdo -->
     @foreach($evento->blocos as $bloco)
         @if($bloco->tipo === 'hero')
-            <section class="hero-section bg-principal text-white py-24">
-                <div class="container mx-auto px-4">
+            @php
+                $heroStyle = 'background-color: var(--cor-principal);';
+                if($bloco->conteudo && isset($bloco->conteudo['imagem_fundo'])) {
+                    $heroStyle = "background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('" . asset('storage/' . $bloco->conteudo['imagem_fundo']) . "'); background-size: cover; background-position: center;";
+                }
+
+                // Ordem padrão dos componentes
+                $ordem = $bloco->conteudo['ordem_componentes'] ?? ['titulo', 'subtitulo', 'imagem', 'cards'];
+            @endphp
+            <section class="bloco-secao text-white py-24 relative" data-bloco-id="{{ $bloco->id }}" style="{{ $heroStyle }}">
+                <div class="bloco-handle">
+                    <i class="fas fa-grip-vertical"></i>
+                    <span>Arrastar</span>
+                </div>
+
+                <div class="container mx-auto px-4 relative z-20">
                     <div class="max-w-4xl mx-auto text-center">
-                        <h1 class="text-5xl md:text-6xl font-bold mb-4">{{ $evento->nome }}</h1>
-                        @if($bloco->conteudo && isset($bloco->conteudo['subtitulo']))
-                        <p class="text-xl md:text-2xl mb-8 opacity-90">{{ $bloco->conteudo['subtitulo'] }}</p>
-                        @endif
+                        <div id="hero-components-{{ $bloco->id }}" class="space-y-6">
+                            @foreach($ordem as $componente)
+                                @if($componente === 'titulo')
+                                    <div class="hero-component" data-component="titulo">
+                                        <div class="component-handle hidden bg-blue-600 text-white text-xs px-3 py-1 rounded mb-2 inline-block cursor-move">
+                                            <i class="fas fa-grip-vertical mr-1"></i>Título
+                                        </div>
+                                        <h1 class="text-5xl md:text-6xl font-bold">{{ $evento->nome }}</h1>
+                                    </div>
+                                @elseif($componente === 'subtitulo' && $bloco->conteudo && isset($bloco->conteudo['subtitulo']))
+                                    <div class="hero-component" data-component="subtitulo">
+                                        <div class="component-handle hidden bg-blue-600 text-white text-xs px-3 py-1 rounded mb-2 inline-block cursor-move">
+                                            <i class="fas fa-grip-vertical mr-1"></i>Subtítulo
+                                        </div>
+                                        <p class="text-xl md:text-2xl opacity-90">{{ $bloco->conteudo['subtitulo'] }}</p>
+                                    </div>
+                                @elseif($componente === 'imagem' && $bloco->conteudo && isset($bloco->conteudo['imagem']))
+                                    <div class="hero-component flex justify-center" data-component="imagem">
+                                        <div>
+                                            <div class="component-handle hidden bg-blue-600 text-white text-xs px-3 py-1 rounded mb-2 inline-block cursor-move">
+                                                <i class="fas fa-grip-vertical mr-1"></i>Imagem
+                                            </div>
+                                            <img src="{{ asset('storage/' . $bloco->conteudo['imagem']) }}"
+                                                 alt="Imagem"
+                                                 class="max-w-xs rounded-lg shadow-2xl mx-auto">
+                                        </div>
+                                    </div>
+                                @elseif($componente === 'cards')
+                                    <div class="hero-component" data-component="cards">
+                                        <div class="component-handle hidden bg-blue-600 text-white text-xs px-3 py-1 rounded mb-2 inline-block cursor-move">
+                                            <i class="fas fa-grip-vertical mr-1"></i>Informações
+                                        </div>
+                                        <div class="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                                            @if($evento->data_evento)
+                                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4 text-center w-full sm:w-auto sm:min-w-[200px]">
+                                                <i class="fas fa-calendar-alt text-2xl mb-2"></i>
+                                                <p class="text-sm opacity-75">Data</p>
+                                                <p class="text-lg font-bold">{{ date('d/m/Y', strtotime($evento->data_evento)) }}</p>
+                                            </div>
+                                            @endif
 
-                        <div class="flex flex-wrap justify-center gap-6 mt-12">
-                            @if($evento->data_evento)
-                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4">
-                                <i class="fas fa-calendar-alt text-2xl mb-2"></i>
-                                <p class="text-sm opacity-75">Data</p>
-                                <p class="text-lg font-bold">{{ date('d/m/Y', strtotime($evento->data_evento)) }}</p>
-                            </div>
-                            @endif
+                                            @if($evento->hora_evento)
+                                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4 text-center w-full sm:w-auto sm:min-w-[200px]">
+                                                <i class="fas fa-clock text-2xl mb-2"></i>
+                                                <p class="text-sm opacity-75">Hora</p>
+                                                <p class="text-lg font-bold">{{ date('H:i', strtotime($evento->hora_evento)) }}</p>
+                                            </div>
+                                            @endif
 
-                            @if($evento->local)
-                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4">
-                                <i class="fas fa-map-marker-alt text-2xl mb-2"></i>
-                                <p class="text-sm opacity-75">Local</p>
-                                <p class="text-lg font-bold">{{ $evento->local }}</p>
-                            </div>
-                            @endif
+                                            @if($evento->local || $evento->endereco)
+                                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4 text-center w-full sm:w-auto sm:min-w-[200px]">
+                                                <i class="fas fa-map-marker-alt text-2xl mb-2"></i>
+                                                <p class="text-sm opacity-75">Local</p>
+                                                <p class="text-lg font-bold">
+                                                    @if($evento->local && $evento->endereco)
+                                                        {{ $evento->local }}<br><span class="text-sm opacity-75">{{ $evento->endereco }}</span>
+                                                    @elseif($evento->local)
+                                                        {{ $evento->local }}
+                                                    @else
+                                                        {{ $evento->endereco }}
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            @endif
 
-                            @if($evento->valor_ingresso)
-                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4">
-                                <i class="fas fa-ticket-alt text-2xl mb-2"></i>
-                                <p class="text-sm opacity-75">Ingresso</p>
-                                <p class="text-lg font-bold">R$ {{ number_format($evento->valor_ingresso, 2, ',', '.') }}</p>
-                            </div>
-                            @endif
+                                            @if($evento->valor_ingresso)
+                                            <div class="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4 text-center w-full sm:w-auto sm:min-w-[200px]">
+                                                <i class="fas fa-ticket-alt text-2xl mb-2"></i>
+                                                <p class="text-sm opacity-75">Ingresso</p>
+                                                <p class="text-lg font-bold">R$ {{ number_format($evento->valor_ingresso, 2, ',', '.') }}</p>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
                 </div>
             </section>
 
         @elseif($bloco->tipo === 'descricao')
-            <section class="py-16 bg-white">
+            <section class="bloco-secao py-16 bg-white" data-bloco-id="{{ $bloco->id }}">
+                <div class="bloco-handle">
+                    <i class="fas fa-grip-vertical"></i>
+                    <span>Arrastar</span>
+                </div>
                 <div class="container mx-auto px-4">
                     <div class="max-w-4xl mx-auto">
                         @if($bloco->conteudo && isset($bloco->conteudo['titulo']))
@@ -164,24 +281,33 @@
 
         @elseif($bloco->tipo === 'banner')
             @if($bloco->conteudo && isset($bloco->conteudo['imagens']))
-            <section class="py-16 bg-white">
-                <div class="container mx-auto px-4">
-                    @foreach($bloco->conteudo['imagens'] as $imagem)
-                    <img src="{{ asset('storage/' . $imagem) }}" alt="Banner" class="w-full max-w-5xl mx-auto rounded-lg shadow-lg">
-                    @endforeach
+            @php
+                $altura = $bloco->conteudo['altura'] ?? 500;
+            @endphp
+            <section class="bloco-secao bg-white" data-bloco-id="{{ $bloco->id }}">
+                <div class="bloco-handle">
+                    <i class="fas fa-grip-vertical"></i>
+                    <span>Arrastar</span>
                 </div>
+                @foreach($bloco->conteudo['imagens'] as $imagem)
+                <div style="height: {{ $altura }}px; overflow: hidden;">
+                    <img src="{{ asset('storage/' . $imagem) }}" alt="Banner" class="w-full h-full object-cover">
+                </div>
+                @endforeach
             </section>
             @endif
 
         @elseif($bloco->tipo === 'mapa')
             @if($bloco->conteudo && isset($bloco->conteudo['iframe']))
-            <section class="py-16 bg-gray-50">
-                <div class="container mx-auto px-4">
-                    <div class="max-w-4xl mx-auto">
-                        <h2 class="text-4xl font-bold text-principal mb-8 text-center">Localização</h2>
-                        <div class="aspect-video rounded-lg overflow-hidden shadow-lg">
-                            {!! $bloco->conteudo['iframe'] !!}
-                        </div>
+            <section class="bloco-secao py-16 bg-gray-50" data-bloco-id="{{ $bloco->id }}">
+                <div class="bloco-handle">
+                    <i class="fas fa-grip-vertical"></i>
+                    <span>Arrastar</span>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-4xl font-bold text-principal mb-8 text-center">Localização</h2>
+                    <div class="aspect-video overflow-hidden shadow-lg">
+                        {!! $bloco->conteudo['iframe'] !!}
                     </div>
                 </div>
             </section>
@@ -209,7 +335,20 @@
 
     <!-- Formulários Dinâmicos -->
     @foreach($evento->formularios as $formulario)
-    <section class="py-16 @if($loop->even) bg-gray-50 @else bg-white @endif">
+    @php
+        $sectionStyle = '';
+        if ($formulario->background_cor) {
+            $sectionStyle .= "background-color: {$formulario->background_cor};";
+        }
+        if ($formulario->background_imagem) {
+            $sectionStyle .= " background-image: url('" . asset('storage/' . $formulario->background_imagem) . "'); background-size: cover; background-position: center;";
+        }
+    @endphp
+    <section class="bloco-secao py-16 {{ !$formulario->background_cor && !$formulario->background_imagem ? ($loop->even ? 'bg-gray-50' : 'bg-white') : '' }}" data-formulario-id="{{ $formulario->id }}" @if($sectionStyle) style="{{ $sectionStyle }}" @endif>
+        <div class="bloco-handle" style="background: rgba(168, 85, 247, 0.95);">
+            <i class="fas fa-grip-vertical"></i>
+            <span>Arrastar Formulário</span>
+        </div>
         <div class="container mx-auto px-4">
             <div class="max-w-2xl mx-auto">
                 <div class="bg-white rounded-lg shadow-lg p-8">
@@ -226,7 +365,7 @@
                                     <p class="text-gray-700">{{ $campo->label }}</p>
                                 </div>
 
-                            @elseif($campo->tipo === 'nome' || $campo->tipo === 'email' || $campo->tipo === 'telefone')
+                            @elseif($campo->tipo === 'texto' || $campo->tipo === 'nome' || $campo->tipo === 'email' || $campo->tipo === 'telefone')
                                 <div>
                                     <label for="campo_{{ $campo->id }}" class="block text-sm font-medium text-gray-700 mb-2">
                                         {{ $campo->label }} @if($campo->obrigatorio)<span class="text-red-500">*</span>@endif
@@ -330,7 +469,7 @@
 
                         <div class="pt-4">
                             <button type="submit" class="w-full bg-destaque text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                                <i class="fas fa-paper-plane mr-2"></i>Enviar
+                                Enviar
                             </button>
                         </div>
                     </form>
@@ -339,6 +478,8 @@
         </div>
     </section>
     @endforeach
+    </div>
+    <!-- Fim do Container de Blocos -->
 
     <!-- Botão de Compartilhamento WhatsApp -->
     <div class="fixed bottom-6 right-6 z-50">
@@ -350,11 +491,198 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-principal text-white py-8 mt-12">
+    <footer class="bg-principal text-white py-4 mt-12">
         <div class="container mx-auto px-4 text-center">
-            <p>&copy; {{ date('Y') }} {{ $evento->nome }}</p>
-            <p class="text-sm opacity-75 mt-2">Desenvolvido com Evenza</p>
+            <!-- Rodapé reservado para informações futuras -->
         </div>
     </footer>
+
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        let editMode = false;
+        let sortableInstance = null;
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const container = document.getElementById('blocos-container');
+            const btn = document.getElementById('toggleEditMode');
+
+            if (editMode) {
+                // Ativar modo de edição
+                container.classList.add('edit-mode');
+                btn.innerHTML = '<i class="fas fa-save text-xl"></i>';
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+                btn.title = 'Salvar ordem';
+
+                // Mostrar toast
+                mostrarToast('Modo de edição ativado! Arraste os blocos para reordenar.', 'info');
+
+                // Inicializar SortableJS para blocos
+                sortableInstance = new Sortable(container, {
+                    animation: 150,
+                    handle: '.bloco-secao',
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    onEnd: function(evt) {
+                        // Salvar será feito ao clicar no botão
+                    }
+                });
+
+                // Inicializar drag and drop para componentes do hero
+                initHeroComponentsDragDrop();
+            } else {
+                // Desativar e salvar
+                salvarOrdem();
+                container.classList.remove('edit-mode');
+                btn.innerHTML = '<i class="fas fa-edit text-xl"></i>';
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                btn.title = 'Ativar modo de edição';
+
+                // Destruir SortableJS
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
+                }
+            }
+        }
+
+        function salvarOrdem() {
+            const container = document.getElementById('blocos-container');
+            const secoes = container.querySelectorAll('.bloco-secao');
+            const blocos = [];
+            const formularios = [];
+
+            secoes.forEach((secao, index) => {
+                if (secao.dataset.blocoId) {
+                    blocos.push(secao.dataset.blocoId);
+                } else if (secao.dataset.formularioId) {
+                    formularios.push(secao.dataset.formularioId);
+                }
+            });
+
+            // Enviar para o servidor
+            fetch('{{ route("eventos.blocos.reorder", $evento) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    blocos: blocos
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarToast('Ordem salva com sucesso!', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao salvar:', error);
+                mostrarToast('Erro ao salvar a ordem. Tente novamente.', 'error');
+            });
+
+            // Salvar ordem dos formulários se houver
+            if (formularios.length > 0) {
+                fetch('{{ route("eventos.formularios.reorder", $evento) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        formularios: formularios
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Ordem dos formulários salva');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar formulários:', error);
+                });
+            }
+        }
+
+        function mostrarToast(mensagem, tipo = 'success') {
+            const colors = {
+                'success': 'bg-green-500',
+                'error': 'bg-red-500',
+                'info': 'bg-blue-500'
+            };
+            const icons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'info': 'fa-info-circle'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 ${colors[tipo]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
+            toast.innerHTML = `<i class="fas ${icons[tipo]} mr-2"></i>${mensagem}`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Drag and drop para componentes do hero
+        let heroComponentsSortables = [];
+
+        function initHeroComponentsDragDrop() {
+            // Destruir sortables anteriores
+            heroComponentsSortables.forEach(s => s.destroy());
+            heroComponentsSortables = [];
+
+            if (!editMode) return;
+
+            // Inicializar sortable para cada container de componentes do hero
+            document.querySelectorAll('[id^="hero-components-"]').forEach(container => {
+                const blocoId = container.id.replace('hero-components-', '');
+                const sortable = new Sortable(container, {
+                    animation: 150,
+                    handle: '.hero-component',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function(evt) {
+                        // Capturar nova ordem
+                        const componentes = [];
+                        container.querySelectorAll('.hero-component').forEach(comp => {
+                            componentes.push(comp.dataset.component);
+                        });
+
+                        // Salvar ordem
+                        fetch(`/eventos/{{ $evento->id }}/blocos/${blocoId}/ordem-componentes`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                ordem: componentes
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                mostrarToast('Ordem dos componentes salva!', 'success');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao salvar ordem:', error);
+                            mostrarToast('Erro ao salvar ordem dos componentes', 'error');
+                        });
+                    }
+                });
+
+                heroComponentsSortables.push(sortable);
+            });
+        }
+    </script>
 </body>
 </html>

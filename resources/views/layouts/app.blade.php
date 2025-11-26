@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Yesteryear&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBXnN8KxWvYqWq9hZqPjN5jZqWq9hZqPjN&libraries=places" async defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -97,4 +98,10 @@
     </main>
 
     <script>
-        docu
+        document.getElementById('menu-mobile')?.addEventListener('click', function() {
+            const menuConteudo = document.getElementById('menu-mobile-conteudo');
+            menuConteudo.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

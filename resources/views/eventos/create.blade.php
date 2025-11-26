@@ -4,15 +4,17 @@
 
 @section('conteudo')
 <div class="container mx-auto px-4 py-8 max-w-2xl">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Novo Evento</h1>
-        <a href="/eventos" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-            <i class="fas fa-arrow-left mr-2"></i>Voltar
+    <div class="flex items-center gap-4 mb-8">
+        <a href="/eventos"
+           class="inline-flex items-center justify-center w-10 h-10 text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 focus:outline-none"
+           title="Voltar">
+            <i class="fas fa-chevron-left text-xl"></i>
         </a>
+        <h1 class="text-3xl font-bold text-gray-800">Novo Evento</h1>
     </div>
 
     <div class="bg-white rounded-lg shadow p-8">
-        <x-eventos.form action="/eventos/salvar" submit="Cadastrar Evento"/>
+        <x-eventos.form action="/eventos/salvar" submit="Cadastrar"/>
     </div>
 </div>
 @endsection

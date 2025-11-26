@@ -11,10 +11,15 @@ class Evento extends Model
         'slug',
         'descricao',
         'data_evento',
+        'hora_evento',
         'local',
+        'endereco',
         'status',
         'capacidade',
         'valor_ingresso',
+        'custo_por_pessoa',
+        'whatsapp_oficial',
+        'observacoes',
         'landing_page_ativa'
     ];
 
@@ -46,5 +51,15 @@ class Evento extends Model
     public function formularioRespostas()
     {
         return $this->hasMany(FormularioResposta::class);
+    }
+
+    public function organizadores()
+    {
+        return $this->hasMany(EventoOrganizador::class)->orderBy('ordem');
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'evento_user');
     }
 }

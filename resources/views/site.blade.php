@@ -127,26 +127,74 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
                     <div class="text-4xl text-acento mb-4">
+                        <i class="fas fa-pager"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4">Landing Pages Personalizadas</h4>
+                    <p class="text-gray-600">Crie páginas profissionais para seus eventos com blocos customizáveis, fotos, agenda e mapas integrados.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-4xl text-acento mb-4">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4">Formulários Personalizados</h4>
+                    <p class="text-gray-600">Crie formulários sob medida com diversos tipos de campos para coletar exatamente as informações que você precisa.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-4xl text-acento mb-4">
                         <i class="fas fa-list-check"></i>
                     </div>
-                    <h4 class="text-xl font-semibold mb-4">Organização Eficiente</h4>
-                    <p class="text-gray-600">Controle total sobre eventos e participantes em um só lugar.</p>
+                    <h4 class="text-xl font-semibold mb-4">Gestão de Inscrições</h4>
+                    <p class="text-gray-600">Controle total sobre confirmações de presença, capacidade de vagas e lista de participantes em tempo real.</p>
                 </div>
-                
+
                 <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
                     <div class="text-4xl text-acento mb-4">
                         <i class="fas fa-tachometer-alt"></i>
                     </div>
-                    <h4 class="text-xl font-semibold mb-4">Painel intuitivo</h4>
-                    <p class="text-gray-600">Gestão centralizada com interface amigável e fácil de usar.</p>
-                </div>                              
-                
+                    <h4 class="text-xl font-semibold mb-4">Painel Intuitivo</h4>
+                    <p class="text-gray-600">Gestão centralizada com interface amigável, filtros avançados e visualização clara de todas as informações.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-4xl text-acento mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4">Relatórios e Exportação</h4>
+                    <p class="text-gray-600">Exporte dados de participantes, respostas de formulários e gere relatórios detalhados para análise.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-4xl text-acento mb-4">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4">Múltiplos Organizadores</h4>
+                    <p class="text-gray-600">Gerencie equipes de organizadores com funções e contatos específicos para cada evento.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-4xl text-acento mb-4">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4">Controle Financeiro</h4>
+                    <p class="text-gray-600">Acompanhe receitas e custos do evento, com cálculo automático de saldo e lucro estimado.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-4xl text-acento mb-4">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4">Compartilhamento Fácil</h4>
+                    <p class="text-gray-600">Links públicos personalizados, QR codes e integração direta com suas ferramentas de comunicação.</p>
+                </div>
+
                 <div class="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
                     <div class="text-4xl text-acento mb-4">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h4 class="text-xl font-semibold mb-4">Segurança e confiabilidade</h4>
-                    <p class="text-gray-600">Seus dados e de seus convidados sempre protegidos.</p>
+                    <h4 class="text-xl font-semibold mb-4">Segurança e Confiabilidade</h4>
+                    <p class="text-gray-600">Seus dados e de seus convidados sempre protegidos com tecnologia moderna e confiável.</p>
                 </div>
             </div>
         </div>
@@ -164,38 +212,58 @@
                             <i class="fas fa-building"></i>
                         </div>
                         <div>
-                            <h4 class="text-xl font-semibold mb-2">Empresas</h4>
-                            <p class="text-gray-600">Que organizam eventos corporativos e reuniões estratégicas.</p>
+                            <h4 class="text-xl font-semibold mb-2">Empresas Privadas</h4>
+                            <p class="text-gray-600">Que organizam eventos corporativos, reuniões estratégicas, treinamentos e confraternizações.</p>
                         </div>
                     </div>
-                    
+
+                    <div class="flex items-center">
+                        <div class="w-16 h-16 bg-acento bg-opacity-10 rounded-full flex items-center justify-center text-acento text-2xl mr-6">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-semibold mb-2">Instituições Públicas</h4>
+                            <p class="text-gray-600">Órgãos governamentais, prefeituras e secretarias que realizam eventos, palestras e capacitações.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <div class="w-16 h-16 bg-acento bg-opacity-10 rounded-full flex items-center justify-center text-acento text-2xl mr-6">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-semibold mb-2">Instituições de Ensino</h4>
+                            <p class="text-gray-600">Universidades, faculdades, institutos como IFMS, escolas que organizam seminários, palestras e eventos acadêmicos.</p>
+                        </div>
+                    </div>
+
                     <div class="flex items-center">
                         <div class="w-16 h-16 bg-acento bg-opacity-10 rounded-full flex items-center justify-center text-acento text-2xl mr-6">
                             <i class="fas fa-bullhorn"></i>
                         </div>
                         <div>
                             <h4 class="text-xl font-semibold mb-2">Departamentos de Marketing</h4>
-                            <p class="text-gray-600">E comunicação que realizam webaulas e treinamentos.</p>
+                            <p class="text-gray-600">E comunicação que realizam webaulas, webinars, lançamentos de produtos e treinamentos.</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-center">
                         <div class="w-16 h-16 bg-acento bg-opacity-10 rounded-full flex items-center justify-center text-acento text-2xl mr-6">
-                            <i class="fas fa-clipboard-check"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                         <div>
-                            <h4 class="text-xl font-semibold mb-2">Equipes de Gestão</h4>
-                            <p class="text-gray-600">Que precisam gerenciar confirmações de presença e preferências de participantes.</p>
+                            <h4 class="text-xl font-semibold mb-2">Associações e ONGs</h4>
+                            <p class="text-gray-600">Entidades que promovem encontros, assembleias, eventos beneficentes e ações comunitárias.</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-center">
                         <div class="w-16 h-16 bg-acento bg-opacity-10 rounded-full flex items-center justify-center text-acento text-2xl mr-6">
                             <i class="fas fa-glass-cheers"></i>
                         </div>
                         <div>
                             <h4 class="text-xl font-semibold mb-2">Organizadores de Eventos</h4>
-                            <p class="text-gray-600">De confraternizações, festas de fim de ano, eventos internos e externos.</p>
+                            <p class="text-gray-600">Profissionais que gerenciam festas de fim de ano, confraternizações, eventos internos e externos.</p>
                         </div>
                     </div>
                 </div>

@@ -4,22 +4,51 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Configurar Landing Page</h1>
-                <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
+        <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <a href="/eventos/{{ $evento->id }}"
+                   class="inline-flex items-center justify-center w-10 h-10 text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 focus:outline-none"
+                   title="Voltar">
+                    <i class="fas fa-chevron-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Landing Page</h1>
+                    <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
+                </div>
             </div>
-            <div class="flex gap-3">
-                @if($evento->landing_page_ativa)
+            @if($evento->landing_page_ativa)
+            <div class="flex justify-end">
                 <a href="{{ route('landing-page.show', $evento->slug) }}" target="_blank"
                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     <i class="fas fa-external-link-alt mr-2"></i>Ver Landing Page
                 </a>
-                @endif
-                <a href="/eventos/{{ $evento->id }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                    <i class="fas fa-arrow-left mr-2"></i>Voltar
-                </a>
             </div>
+            @endif
+        </div>
+
+        <!-- Links para Gestão de Blocos e Formulários -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <a href="{{ route('eventos.blocos.index', $evento) }}"
+               class="block bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6 hover:from-purple-600 hover:to-purple-700 transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Blocos de Conteúdo</h3>
+                        <p class="text-sm opacity-90">Gerencie seções de hero, descrição, agenda, banners, etc.</p>
+                    </div>
+                    <i class="fas fa-th-large text-3xl opacity-75"></i>
+                </div>
+            </a>
+
+            <a href="{{ route('eventos.formularios.index', $evento) }}"
+               class="block bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6 hover:from-green-600 hover:to-green-700 transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">Formulários</h3>
+                        <p class="text-sm opacity-90">Crie formulários personalizados para captar informações</p>
+                    </div>
+                    <i class="fas fa-clipboard-list text-3xl opacity-75"></i>
+                </div>
+            </a>
         </div>
 
         <!-- Formulário de Configuração -->
@@ -27,9 +56,9 @@
             @csrf
             @method('PUT')
 
-            <!-- Status da Landing Page -->
+            <!-- Configurações da Landing Page -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Status</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Configurações</h2>
 
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
@@ -44,10 +73,27 @@
                     </label>
                 </div>
 
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        URL Personalizada (Slug)
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600">{{ url('/') }}/</span>
+                        <input type="text" name="slug" value="{{ $evento->slug }}"
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="meu-evento"
+                               pattern="[a-z0-9-]+"
+                               title="Use apenas letras minúsculas, números e hífens">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Use apenas letras minúsculas, números e hífens. Ex: workshop-laravel-2024
+                    </p>
+                </div>
+
                 @if($evento->slug)
                 <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <p class="text-sm text-gray-700">
-                        <i class="fas fa-link mr-2"></i><strong>URL da Landing Page:</strong>
+                        <i class="fas fa-link mr-2"></i><strong>URL Atual:</strong>
                         <a href="{{ url('/' . $evento->slug) }}" target="_blank" class="text-blue-600 hover:underline">
                             {{ url('/' . $evento->slug) }}
                         </a>
@@ -80,7 +126,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Cor de Destaque
+                            Cor dos Botões
                         </label>
                         <div class="flex gap-2">
                             <input type="color"
@@ -92,107 +138,21 @@
                                    readonly
                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Cor dos botões e destaques</p>
+                        <p class="text-xs text-gray-500 mt-1">Cor dos botões e elementos interativos</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- Imagens -->
-            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Imagens</h2>
-
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Logo
-                        </label>
-                        @if($evento->tema && $evento->tema->logo)
-                        <div class="mb-3">
-                            <img src="{{ asset('storage/' . $evento->tema->logo) }}"
-                                 alt="Logo atual"
-                                 class="h-16 border border-gray-200 rounded p-2">
-                        </div>
-                        @endif
-                        <input type="file"
-                               name="logo"
-                               accept="image/*"
-                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <p class="text-xs text-gray-500 mt-1">Aparece no topo da landing page (máx. 2MB)</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Imagem de Fundo (Hero)
-                        </label>
-                        @if($evento->tema && $evento->tema->imagem_fundo)
-                        <div class="mb-3">
-                            <img src="{{ asset('storage/' . $evento->tema->imagem_fundo) }}"
-                                 alt="Fundo atual"
-                                 class="h-32 w-64 object-cover border border-gray-200 rounded">
-                        </div>
-                        @endif
-                        <input type="file"
-                               name="imagem_fundo"
-                               accept="image/*"
-                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <p class="text-xs text-gray-500 mt-1">Imagem de fundo da seção hero (máx. 5MB)</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Template de Mensagem WhatsApp -->
-            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Mensagem de Compartilhamento</h2>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Template da Mensagem WhatsApp
-                    </label>
-                    <textarea name="template_mensagem_compartilhar"
-                              rows="4"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Olá {nome}! Você está confirmado no evento {evento_nome}...">{{ $evento->tema->template_mensagem_compartilhar ?? '' }}</textarea>
-                    <p class="text-xs text-gray-500 mt-2">
-                        Variáveis disponíveis: {nome}, {email}, {contato}, {evento_nome}, {evento_data}, {evento_local}
-                    </p>
                 </div>
             </div>
 
             <!-- Botões de Ação -->
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-end gap-3 mb-6">
                 <a href="/eventos/{{ $evento->id }}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                     Cancelar
                 </a>
                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-save mr-2"></i>Salvar Configurações
+                    <i class="fas fa-save mr-2"></i>Salvar
                 </button>
             </div>
         </form>
-
-        <!-- Links para Gestão de Blocos e Formulários -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <a href="{{ route('eventos.blocos.index', $evento) }}"
-               class="block bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6 hover:from-purple-600 hover:to-purple-700 transition-all">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold mb-2">Blocos de Conteúdo</h3>
-                        <p class="text-sm opacity-90">Gerencie seções de hero, descrição, agenda, banners, etc.</p>
-                    </div>
-                    <i class="fas fa-th-large text-3xl opacity-75"></i>
-                </div>
-            </a>
-
-            <a href="{{ route('eventos.formularios.index', $evento) }}"
-               class="block bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6 hover:from-green-600 hover:to-green-700 transition-all">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold mb-2">Formulários</h3>
-                        <p class="text-sm opacity-90">Crie formulários personalizados para captar informações</p>
-                    </div>
-                    <i class="fas fa-clipboard-list text-3xl opacity-75"></i>
-                </div>
-            </a>
-        </div>
     </div>
 </div>
 @endsection

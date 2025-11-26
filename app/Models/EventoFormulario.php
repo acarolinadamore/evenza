@@ -14,11 +14,15 @@ class EventoFormulario extends Model
         'slug',
         'mensagem_sucesso',
         'ordem',
-        'ativo'
+        'ativo',
+        'exibir_landing_page',
+        'background_cor',
+        'background_imagem'
     ];
 
     protected $casts = [
-        'ativo' => 'boolean'
+        'ativo' => 'boolean',
+        'exibir_landing_page' => 'boolean'
     ];
 
     public function evento()

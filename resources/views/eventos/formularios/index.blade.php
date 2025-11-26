@@ -4,29 +4,24 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Formulários</h1>
-                <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
+        <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <a href="{{ route('eventos.landing-page.edit', $evento) }}"
+                   class="inline-flex items-center justify-center w-10 h-10 text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 focus:outline-none"
+                   title="Voltar">
+                    <i class="fas fa-chevron-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Formulários</h1>
+                    <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
+                </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex justify-end">
                 <a href="{{ route('eventos.formularios.create', $evento) }}"
                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                     <i class="fas fa-plus mr-2"></i>Novo Formulário
                 </a>
-                <a href="{{ route('eventos.landing-page.edit', $evento) }}"
-                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                    <i class="fas fa-arrow-left mr-2"></i>Voltar
-                </a>
             </div>
-        </div>
-
-        <!-- Info -->
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-            <p class="text-sm text-blue-800">
-                <i class="fas fa-info-circle mr-2"></i>
-                Crie formulários personalizados para captar informações dos visitantes. Cada formulário pode ter múltiplos campos de diferentes tipos.
-            </p>
         </div>
 
         <!-- Lista de Formulários -->
@@ -57,6 +52,46 @@
                         </div>
                         <div class="text-sm text-gray-600 mt-1">
                             <i class="fas fa-inbox mr-2"></i>{{ $formulario->respostas->count() }} resposta(s)
+                        </div>
+                    </div>
+
+                    <!-- Configuração Landing Page -->
+                    <div class="mb-4 pt-4 border-t border-gray-200">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-globe mr-1"></i>Configuração Landing Page
+                        </h4>
+
+                        <!-- Checkbox Exibir na Landing Page -->
+                        <div class="mb-3">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                       data-formulario-id="{{ $formulario->id }}"
+                                       onchange="toggleExibirLandingPage(this)"
+                                       {{ $formulario->exibir_landing_page ? 'checked' : '' }}>
+                                <span class="ml-2 text-sm text-gray-700">Exibir na landing page</span>
+                            </label>
+                        </div>
+
+                        <!-- Color Picker para Background -->
+                        <div id="bg-color-container-{{ $formulario->id }}"
+                             class="{{ $formulario->exibir_landing_page ? '' : 'hidden' }}">
+                            <label class="block text-xs text-gray-600 mb-1">
+                                <i class="fas fa-palette mr-1"></i>Cor de Fundo do Container
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="color"
+                                       id="bg-color-{{ $formulario->id }}"
+                                       value="{{ $formulario->background_cor ?? '#ffffff' }}"
+                                       class="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                                       onchange="updateBackgroundCor({{ $formulario->id }}, this.value)">
+                                <input type="text"
+                                       id="bg-color-text-{{ $formulario->id }}"
+                                       value="{{ $formulario->background_cor ?? '#ffffff' }}"
+                                       class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="#ffffff"
+                                       onchange="updateBackgroundCorFromText({{ $formulario->id }}, this.value)">
+                            </div>
                         </div>
                     </div>
 
@@ -99,4 +134,102 @@
         @endif
     </div>
 </div>
+
+<script>
+function toggleExibirLandingPage(checkbox) {
+    const formularioId = checkbox.dataset.formularioId;
+    const exibir = checkbox.checked;
+    const colorContainer = document.getElementById(`bg-color-container-${formularioId}`);
+
+    // Toggle color picker visibility
+    if (exibir) {
+        colorContainer.classList.remove('hidden');
+    } else {
+        colorContainer.classList.add('hidden');
+    }
+
+    // Save to backend
+    fetch(`/eventos/{{ $evento->id }}/formularios/${formularioId}/landing-page-config`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            exibir_landing_page: exibir
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarToast(exibir ? 'Formulário adicionado à landing page' : 'Formulário removido da landing page', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        mostrarToast('Erro ao atualizar configuração', 'error');
+        // Revert checkbox on error
+        checkbox.checked = !exibir;
+    });
+}
+
+function updateBackgroundCor(formularioId, cor) {
+    // Update text input
+    document.getElementById(`bg-color-text-${formularioId}`).value = cor;
+
+    // Save to backend
+    saveBackgroundCor(formularioId, cor);
+}
+
+function updateBackgroundCorFromText(formularioId, cor) {
+    // Validate hex color
+    const hexPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    if (!hexPattern.test(cor)) {
+        mostrarToast('Cor inválida. Use formato hexadecimal (#ffffff)', 'error');
+        return;
+    }
+
+    // Update color picker
+    document.getElementById(`bg-color-${formularioId}`).value = cor;
+
+    // Save to backend
+    saveBackgroundCor(formularioId, cor);
+}
+
+function saveBackgroundCor(formularioId, cor) {
+    fetch(`/eventos/{{ $evento->id }}/formularios/${formularioId}/landing-page-config`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            background_cor: cor
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarToast('Cor de fundo atualizada', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        mostrarToast('Erro ao atualizar cor de fundo', 'error');
+    });
+}
+
+function mostrarToast(mensagem, tipo) {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-50 ${tipo === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
+
 @endsection

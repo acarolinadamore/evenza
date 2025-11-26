@@ -4,34 +4,36 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Blocos de Conteúdo</h1>
-                <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
+        <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                <a href="{{ route('eventos.landing-page.edit', $evento) }}"
+                   class="inline-flex items-center justify-center w-10 h-10 text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 focus:outline-none"
+                   title="Voltar">
+                    <i class="fas fa-chevron-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Blocos de Conteúdo</h1>
+                    <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
+                </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex justify-end">
                 <a href="{{ route('eventos.blocos.create', $evento) }}"
                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                     <i class="fas fa-plus mr-2"></i>Novo Bloco
                 </a>
-                <a href="{{ route('eventos.landing-page.edit', $evento) }}"
-                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                    <i class="fas fa-arrow-left mr-2"></i>Voltar
-                </a>
             </div>
         </div>
 
-        <!-- Info -->
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-            <p class="text-sm text-blue-800">
-                <i class="fas fa-info-circle mr-2"></i>
-                Os blocos aparecem na landing page pública na ordem definida. Você pode criar diferentes tipos de blocos para montar a página do seu evento.
-            </p>
-        </div>
 
         <!-- Lista de Blocos -->
         @if($blocos->count() > 0)
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-blue-50 border-b border-blue-200 px-6 py-3">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-grip-vertical mr-2"></i>
+                    Arraste os blocos para reordenar
+                </p>
+            </div>
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -52,17 +54,20 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-gray-200" id="blocos-sortable">
                     @foreach($blocos as $bloco)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 cursor-move" data-bloco-id="{{ $bloco->id }}">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-sm font-bold text-gray-900">{{ $bloco->ordem + 1 }}</span>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-grip-vertical text-gray-400"></i>
+                                <span class="text-sm font-bold text-gray-900">{{ $bloco->ordem + 1 }}</span>
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @php
                                 $tipos = [
-                                    'hero' => ['label' => 'Hero', 'icon' => 'fa-star', 'color' => 'purple'],
-                                    'descricao' => ['label' => 'Descrição', 'icon' => 'fa-align-left', 'color' => 'blue'],
+                                    'hero' => ['label' => 'Seção com imagem', 'icon' => 'fa-box', 'color' => 'purple'],
+                                    'descricao' => ['label' => 'Seção sem imagem', 'icon' => 'fa-align-left', 'color' => 'blue'],
                                     'agenda' => ['label' => 'Agenda', 'icon' => 'fa-calendar', 'color' => 'green'],
                                     'banner' => ['label' => 'Banner', 'icon' => 'fa-image', 'color' => 'yellow'],
                                     'mapa' => ['label' => 'Mapa', 'icon' => 'fa-map-marker-alt', 'color' => 'red'],
@@ -137,29 +142,21 @@
         <!-- Tipos de Blocos Disponíveis -->
         <div class="mt-8 bg-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-bold text-gray-800 mb-4">Tipos de Blocos Disponíveis</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="border border-purple-200 rounded-lg p-4 bg-purple-50">
                     <div class="flex items-center mb-2">
-                        <i class="fas fa-star text-purple-600 text-xl mr-3"></i>
-                        <h4 class="font-bold text-purple-900">Hero</h4>
+                        <i class="fas fa-box text-purple-600 text-xl mr-3"></i>
+                        <h4 class="font-bold text-purple-900">Seção com imagem</h4>
                     </div>
-                    <p class="text-sm text-purple-700">Seção principal com título e destaque</p>
+                    <p class="text-sm text-purple-700">Título, Imagem, texto</p>
                 </div>
 
                 <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
                     <div class="flex items-center mb-2">
                         <i class="fas fa-align-left text-blue-600 text-xl mr-3"></i>
-                        <h4 class="font-bold text-blue-900">Descrição</h4>
+                        <h4 class="font-bold text-blue-900">Seção sem imagem</h4>
                     </div>
-                    <p class="text-sm text-blue-700">Texto descritivo sobre o evento</p>
-                </div>
-
-                <div class="border border-green-200 rounded-lg p-4 bg-green-50">
-                    <div class="flex items-center mb-2">
-                        <i class="fas fa-calendar text-green-600 text-xl mr-3"></i>
-                        <h4 class="font-bold text-green-900">Agenda</h4>
-                    </div>
-                    <p class="text-sm text-green-700">Programação com horários</p>
+                    <p class="text-sm text-blue-700">Título e Texto</p>
                 </div>
 
                 <div class="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
@@ -177,16 +174,59 @@
                     </div>
                     <p class="text-sm text-red-700">Localização do evento</p>
                 </div>
-
-                <div class="border border-pink-200 rounded-lg p-4 bg-pink-50">
-                    <div class="flex items-center mb-2">
-                        <i class="fas fa-images text-pink-600 text-xl mr-3"></i>
-                        <h4 class="font-bold text-pink-900">Galeria</h4>
-                    </div>
-                    <p class="text-sm text-pink-700">Grade de fotos</p>
-                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sortable = document.getElementById('blocos-sortable');
+
+        if (sortable) {
+            new Sortable(sortable, {
+                animation: 150,
+                handle: '.cursor-move',
+                ghostClass: 'bg-blue-50',
+                onEnd: function(evt) {
+                    // Pega a nova ordem dos blocos
+                    const blocos = [];
+                    sortable.querySelectorAll('tr[data-bloco-id]').forEach((tr, index) => {
+                        blocos.push(tr.dataset.blocoId);
+                        // Atualiza o número de ordem visualmente
+                        tr.querySelector('.text-sm.font-bold').textContent = index + 1;
+                    });
+
+                    // Envia a nova ordem para o servidor
+                    fetch('{{ route("eventos.blocos.reorder", $evento) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            blocos: blocos
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mostra feedback visual
+                            const toast = document.createElement('div');
+                            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                            toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Ordem atualizada!';
+                            document.body.appendChild(toast);
+                            setTimeout(() => toast.remove(), 2000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao reordenar:', error);
+                        alert('Erro ao salvar a nova ordem. Tente novamente.');
+                    });
+                }
+            });
+        }
+    });
+</script>
 @endsection

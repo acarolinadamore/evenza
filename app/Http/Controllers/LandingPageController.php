@@ -20,7 +20,10 @@ class LandingPageController extends Controller
                     $query->where('ativo', true)->orderBy('ordem');
                 },
                 'formularios' => function ($query) {
-                    $query->where('ativo', true)->orderBy('ordem')->with('campos');
+                    $query->where('ativo', true)
+                        ->where('exibir_landing_page', true)
+                        ->orderBy('ordem')
+                        ->with('campos');
                 }
             ])
             ->firstOrFail();

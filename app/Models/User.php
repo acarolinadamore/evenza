@@ -14,6 +14,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     protected $hidden = [
@@ -27,5 +28,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function eventos()
+    {
+        return $this->belongsToMany(Evento::class, 'evento_user');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'administrador';
     }
 }

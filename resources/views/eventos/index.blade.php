@@ -1,64 +1,68 @@
 @extends('layouts.app')
 
-@section('titulo', 'Lista de Eventos')
+@section('titulo', 'Eventos')
 
 @section('conteudo')
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-5xl font-bold text-gray-800 mb-2 font-titulo">Lista de Eventos</h1>
+        <h1 class="text-5xl font-bold text-gray-800 mb-2 font-titulo">Eventos</h1>
         <a href="/eventos/novo" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 rounded-md bg-neutral-950 hover:bg-neutral-900 focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 focus:shadow-outline focus:outline-none">
             <i class="fas fa-plus mr-2"></i>Novo Evento
         </a>
     </div>
 
     <div class="flex flex-col">
-        <div class="overflow-x-auto">
-            <div class="inline-block min-w-full">
-                <div class="overflow-hidden border rounded-lg">
-                    <table class="min-w-full divide-y divide-neutral-200" style="table-layout: fixed;">
+        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle">
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-neutral-200" style="table-layout: auto;">
                         <thead class="bg-neutral-50">
                             <tr class="text-neutral-500">
                                 <th class="px-5 py-3 text-xs font-medium text-left uppercase cursor-pointer hover:bg-neutral-100" style="width: 20%;" onclick="sortTable(0)">
-                                    Nome <i class="fas fa-sort ml-1" id="sortIcon0"></i>
+                                    Nome <i class="fas fa-sort ml-1 text-gray-300" id="sortIcon0"></i>
                                 </th>
                                 <th class="px-5 py-3 text-xs font-medium text-left uppercase cursor-pointer hover:bg-neutral-100" style="width: 15%;" onclick="sortTable(1)">
-                                    Data do Evento <i class="fas fa-sort ml-1" id="sortIcon1"></i>
+                                    Data do Evento <i class="fas fa-sort ml-1 text-gray-300" id="sortIcon1"></i>
                                 </th>
                                 <th class="px-5 py-3 text-xs font-medium text-left uppercase" style="width: 15%;">Local</th>
                                 <th class="px-5 py-3 text-xs font-medium text-left uppercase" style="width: 12%;">Status</th>
                                 <th class="px-5 py-3 text-xs font-medium text-left uppercase" style="width: 13%;">Participantes</th>
-                                <th class="px-5 py-3 text-xs font-medium text-right uppercase" style="width: 25%;">Ações</th>
+                                <th class="px-5 py-3 text-xs font-medium text-center uppercase sticky right-0 bg-neutral-50 z-20" style="box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);">Ações</th>
                             </tr>
                             <tr class="bg-white">
-                                <th class="px-3 py-1">
+                                <th class="px-2 py-3">
                                     <input type="text" id="searchNome" placeholder="Buscar nome..."
-                                           class="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                           class="w-full px-3 py-2 text-xs font-normal bg-gray-50 border-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
                                 </th>
-                                <th class="px-3 py-1">
+                                <th class="px-2 py-3">
                                     <input type="text" id="searchData" placeholder="dd/mm/aaaa" maxlength="10"
-                                           class="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                           class="w-full px-3 py-2 text-xs font-normal bg-gray-50 border-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
                                 </th>
-                                <th class="px-3 py-1">
-                                    <select id="searchLocal" class="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                        <option value="">Todos os locais</option>
-                                        @foreach($locais as $local)
-                                            <option value="{{ $local }}">{{ $local }}</option>
-                                        @endforeach
+                                <th class="px-2 py-3">
+                                    <input type="text" id="searchLocal" placeholder="Buscar local..."
+                                           class="w-full px-3 py-2 text-xs font-normal bg-gray-50 border-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
+                                </th>
+                                <th class="px-2 py-3">
+                                    <select id="searchStatus" style="
+                                        background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23666%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e');
+                                        background-repeat: no-repeat;
+                                        background-position: right 0.5rem center;
+                                        background-size: 1.2em;
+                                        padding-right: 2rem;
+                                    " class="w-full h-9 px-3 py-2 text-xs font-normal bg-gray-50 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 hover:bg-white hover:border-gray-300 transition-all cursor-pointer appearance-none">
+                                        <option value="" class="bg-white py-2 px-3 hover:bg-blue-50">Todos</option>
+                                        <option value="rascunho" class="bg-white py-2 px-3 hover:bg-blue-50">Rascunho</option>
+                                        <option value="publicado" class="bg-white py-2 px-3 hover:bg-blue-50">Publicado</option>
+                                        <option value="inscricoes_encerradas" class="bg-white py-2 px-3 hover:bg-blue-50">Inscrições Encerradas</option>
+                                        <option value="finalizado" class="bg-white py-2 px-3 hover:bg-blue-50">Finalizado</option>
+                                        <option value="cancelado" class="bg-white py-2 px-3 hover:bg-blue-50">Cancelado</option>
                                     </select>
                                 </th>
-                                <th class="px-3 py-1">
-                                    <select id="searchStatus" class="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                        <option value="">Todos</option>
-                                        <option value="rascunho">Rascunho</option>
-                                        <option value="em_andamento">Em Andamento</option>
-                                        <option value="concluido">Concluído</option>
-                                    </select>
-                                </th>
-                                <th class="px-3 py-1">
+                                <th class="px-2 py-3">
                                     <input type="text" id="searchParticipantes" placeholder="Buscar..."
-                                           class="w-full px-2 py-1 text-xs font-normal border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                           class="w-full px-3 py-2 text-xs font-normal bg-gray-50 border-0 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
                                 </th>
-                                <th class="px-3 py-1"></th>
+                                <th class="px-2 py-3 sticky right-0 bg-white z-20" style="box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-neutral-200" id="eventosTableBody">
@@ -68,56 +72,57 @@
                                 </td>
                             </tr>
                             @foreach ($eventos as $evento)
-                            <tr class="text-neutral-800 hover:bg-neutral-50 data-row" data-status="{{ $evento->status }}">
-                                <td class="px-5 py-4 text-sm font-medium whitespace-nowrap align-middle">{{ $evento->nome }}</td>
+                            <tr class="text-neutral-800 data-row hover:bg-neutral-50" data-status="{{ $evento->status }}">
+                                <td class="px-5 py-4 text-sm whitespace-nowrap align-middle">{{ $evento->nome }}</td>
                                 <td class="px-5 py-4 text-sm align-middle">
-                                    <div>{{ date('d/m/Y', strtotime($evento->data_evento)) }}</div>
                                     @php
                                         $dataEvento = \Carbon\Carbon::parse($evento->data_evento)->startOfDay();
                                         $hoje = \Carbon\Carbon::now()->startOfDay();
                                         $diasRestantes = (int) $hoje->diffInDays($dataEvento, false);
                                     @endphp
-                                    @if($diasRestantes > 0)
-                                        @if($diasRestantes <= 7)
-                                            <div class="mt-1">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                    Faltam {{ $diasRestantes }} dia{{ $diasRestantes > 1 ? 's' : '' }}
-                                                </span>
-                                            </div>
-                                        @elseif($diasRestantes <= 30)
-                                            <div class="mt-1">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                    Faltam {{ $diasRestantes }} dia{{ $diasRestantes > 1 ? 's' : '' }}
-                                                </span>
-                                            </div>
-                                        @else
-                                            <div class="mt-1">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    Faltam {{ $diasRestantes }} dia{{ $diasRestantes > 1 ? 's' : '' }}
-                                                </span>
-                                            </div>
-                                        @endif
-                                    @elseif($diasRestantes == 0)
-                                        <div class="mt-1">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <div class="flex items-center gap-2">
+                                        <span class="whitespace-nowrap">{{ date('d/m/Y', strtotime($evento->data_evento)) }}</span>
+                                        @if($diasRestantes > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                                                Faltam {{ $diasRestantes }} dia{{ $diasRestantes > 1 ? 's' : '' }}
+                                            </span>
+                                        @elseif($diasRestantes == 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 whitespace-nowrap">
                                                 Hoje
                                             </span>
-                                        </div>
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 text-sm whitespace-nowrap align-middle">{{ $evento->local }}</td>
+                                <td class="px-5 py-4 text-sm align-middle">
+                                    <div class="break-words">
+                                        @if($evento->local && $evento->endereco)
+                                            {{ $evento->local }} - {{ $evento->endereco }}
+                                        @elseif($evento->local)
+                                            {{ $evento->local }}
+                                        @elseif($evento->endereco)
+                                            {{ $evento->endereco }}
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="px-5 py-4 text-sm whitespace-nowrap align-middle">
                                     @if($evento->status == 'rascunho')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                             Rascunho
                                         </span>
-                                    @elseif($evento->status == 'em_andamento')
+                                    @elseif($evento->status == 'publicado')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Em Andamento
+                                            Publicado
                                         </span>
-                                    @else
+                                    @elseif($evento->status == 'inscricoes_encerradas')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            Inscrições Encerradas
+                                        </span>
+                                    @elseif($evento->status == 'finalizado')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Concluído
+                                            Finalizado
+                                        </span>
+                                    @elseif($evento->status == 'cancelado')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Cancelado
                                         </span>
                                     @endif
                                 </td>
@@ -136,26 +141,20 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                 Esgotado ({{ $inscritos }}/{{ $capacidade }})
                                             </span>
-                                        @elseif($percentual >= 80)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                {{ $inscritos }}/{{ $capacidade }} vagas
-                                            </span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                {{ $inscritos }}/{{ $capacidade }} vagas
-                                            </span>
+                                            <span class="text-sm text-gray-600 font-normal">{{ $inscritos }}/{{ $capacidade }} vagas</span>
                                         @endif
                                     @else
-                                        <span class="text-gray-600">{{ $inscritos }} inscritos</span>
+                                        <span class="text-sm text-gray-600 font-normal">{{ $inscritos }} inscritos</span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                <td class="px-5 py-4 text-sm font-medium text-center whitespace-nowrap sticky right-0 bg-white z-30" style="box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);">
                                     <a href="/eventos/{{ $evento->id }}"
-                                       class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none mr-2">
-                                        Ver Evento
+                                       class="inline-flex items-center justify-center w-20 px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:shadow-outline focus:outline-none mr-2">
+                                        Ver
                                     </a>
                                     <a href="/eventos/editar/{{ $evento->id }}"
-                                       class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-yellow-500 rounded-md hover:bg-yellow-600 focus:ring-2 focus:ring-offset-2 focus:ring-yellow-600 focus:shadow-outline focus:outline-none mr-2">
+                                       class="inline-flex items-center justify-center w-20 px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-yellow-500 rounded-md hover:bg-yellow-600 focus:ring-2 focus:ring-offset-2 focus:ring-yellow-600 focus:shadow-outline focus:outline-none mr-2">
                                         Editar
                                     </a>
                                     <form action="/eventos/excluir" method="post" class="inline">
@@ -163,7 +162,7 @@
                                         @method('DELETE')
                                         <input type="hidden" name="id" value="{{ $evento->id }}">
                                         <button type="submit"
-                                                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-red-600 rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-700 focus:shadow-outline focus:outline-none"
+                                                class="inline-flex items-center justify-center w-20 px-4 py-2 text-sm font-medium tracking-wide text-white transition-colors duration-200 bg-red-600 rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-700 focus:shadow-outline focus:outline-none"
                                                 onclick="return confirm('Deseja excluir este evento?')">
                                             Excluir
                                         </button>
@@ -194,9 +193,9 @@ function sortTable(columnIndex) {
     for (let i = 0; i < 2; i++) {
         const icon = document.getElementById('sortIcon' + i);
         if (i === columnIndex) {
-            icon.className = sortDirections[i] === 1 ? 'fas fa-sort-up ml-1' : 'fas fa-sort-down ml-1';
+            icon.className = sortDirections[i] === 1 ? 'fas fa-arrow-up ml-1 text-blue-600' : 'fas fa-arrow-down ml-1 text-blue-600';
         } else {
-            icon.className = 'fas fa-sort ml-1';
+            icon.className = 'fas fa-sort ml-1 text-gray-300';
             sortDirections[i] = 0;
         }
     }
@@ -267,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const matchNome = nome.includes(nomeValue);
                 const matchData = data.includes(dataValue);
-                const matchLocal = localValue === '' || local.includes(localValue);
+                const matchLocal = local.includes(localValue);
                 const matchStatus = statusValue === '' || status === statusValue;
                 const matchParticipantes = participantes.includes(participantesValue);
 
@@ -291,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     searchNome.addEventListener('keyup', filterTable);
     searchData.addEventListener('keyup', filterTable);
-    searchLocal.addEventListener('change', filterTable);
+    searchLocal.addEventListener('keyup', filterTable);
     searchStatus.addEventListener('change', filterTable);
     searchParticipantes.addEventListener('keyup', filterTable);
 });

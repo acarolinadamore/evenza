@@ -36,47 +36,22 @@ class EventoLandingPageController extends Controller
     {
         $request->validate([
             'landing_page_ativa' => 'boolean',
+            'slug' => 'required|string|max:255|regex:/^[a-z0-9-]+$/|unique:eventos,slug,' . $evento->id,
             'cor_principal' => 'required|string|max:7',
-            'cor_destaque' => 'required|string|max:7',
-            'logo' => 'nullable|image|max:2048',
-            'imagem_fundo' => 'nullable|image|max:5120',
-            'template_mensagem_compartilhar' => 'nullable|string|max:1000'
+            'cor_destaque' => 'required|string|max:7'
         ]);
 
         // Atualiza o evento
         $evento->update([
-            'landing_page_ativa' => $request->boolean('landing_page_ativa')
+            'landing_page_ativa' => $request->boolean('landing_page_ativa'),
+            'slug' => $request->input('slug')
         ]);
-
-        // Garante que o slug existe
-        if (!$evento->slug) {
-            $evento->slug = SlugService::gerarSlugUnico($evento->nome, $evento->id);
-            $evento->save();
-        }
 
         // Busca ou cria o tema
         $tema = $evento->tema ?? new EventoTema(['evento_id' => $evento->id]);
 
         $tema->cor_principal = $request->input('cor_principal');
         $tema->cor_destaque = $request->input('cor_destaque');
-        $tema->template_mensagem_compartilhar = $request->input('template_mensagem_compartilhar');
-
-        // Upload de logo
-        if ($request->hasFile('logo')) {
-            if ($tema->logo) {
-                Storage::disk('public')->delete($tema->logo);
-            }
-            $tema->logo = $request->file('logo')->store('eventos/logos', 'public');
-        }
-
-        // Upload de imagem de fundo
-        if ($request->hasFile('imagem_fundo')) {
-            if ($tema->imagem_fundo) {
-                Storage::disk('public')->delete($tema->imagem_fundo);
-            }
-            $tema->imagem_fundo = $request->file('imagem_fundo')->store('eventos/fundos', 'public');
-        }
-
         $tema->save();
 
         return back()->with('success', 'Configurações da landing page atualizadas com sucesso!');

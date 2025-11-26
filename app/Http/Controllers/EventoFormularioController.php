@@ -7,6 +7,7 @@ use App\Models\EventoFormulario;
 use App\Models\FormularioCampo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EventoFormularioController extends Controller
@@ -102,6 +103,8 @@ class EventoFormularioController extends Controller
             'nome' => 'required|string|max:255',
             'mensagem_sucesso' => 'nullable|string|max:500',
             'ativo' => 'boolean',
+            'background_cor' => 'nullable|string|max:7',
+            'background_imagem' => 'nullable|image|max:2048',
             'campos' => 'required|array|min:1',
             'campos.*.tipo' => 'required|in:nome,email,telefone,select,checkbox,radio,textarea,mensagem',
             'campos.*.label' => 'required|string|max:255',
@@ -114,12 +117,36 @@ class EventoFormularioController extends Controller
         try {
             $slug = $this->gerarSlugUnico($request->input('nome'), $evento->id, $formulario->id);
 
-            $formulario->update([
+            $data = [
                 'nome' => $request->input('nome'),
                 'slug' => $slug,
                 'mensagem_sucesso' => $request->input('mensagem_sucesso'),
                 'ativo' => $request->boolean('ativo')
-            ]);
+            ];
+
+            // Processar cor de fundo
+            if ($request->boolean('remover_background_cor')) {
+                $data['background_cor'] = null;
+            } else {
+                $data['background_cor'] = $request->input('background_cor');
+            }
+
+            // Processar imagem de fundo
+            if ($request->hasFile('background_imagem')) {
+                // Remover imagem antiga se existir
+                if ($formulario->background_imagem) {
+                    Storage::disk('public')->delete($formulario->background_imagem);
+                }
+                $data['background_imagem'] = $request->file('background_imagem')->store('formularios/backgrounds', 'public');
+            }
+
+            // Remover imagem se solicitado
+            if ($request->boolean('remover_background_imagem') && $formulario->background_imagem) {
+                Storage::disk('public')->delete($formulario->background_imagem);
+                $data['background_imagem'] = null;
+            }
+
+            $formulario->update($data);
 
             // Remove campos antigos
             $formulario->campos()->delete();
@@ -172,6 +199,30 @@ class EventoFormularioController extends Controller
                 ->where('evento_id', $evento->id)
                 ->update(['ordem' => $ordem]);
         }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Atualiza configurações de landing page do formulário
+     */
+    public function updateLandingPageConfig(Request $request, Evento $evento, EventoFormulario $formulario)
+    {
+        $data = [];
+
+        if ($request->has('exibir_landing_page')) {
+            $data['exibir_landing_page'] = $request->boolean('exibir_landing_page');
+        }
+
+        if ($request->has('background_cor')) {
+            $data['background_cor'] = $request->input('background_cor');
+        }
+
+        if ($request->has('background_imagem')) {
+            $data['background_imagem'] = $request->input('background_imagem');
+        }
+
+        $formulario->update($data);
 
         return response()->json(['success' => true]);
     }

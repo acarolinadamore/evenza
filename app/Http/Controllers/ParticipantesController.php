@@ -35,6 +35,10 @@ class ParticipantesController extends Controller
     $participante->telefone = $request->telefone ?? null;
     $participante->is_whatsapp = $request->has('is_whatsapp') ? 1 : 0;
     $participante->evento_id = $request->evento_id ?? null;
+    $participante->observacoes = $request->observacoes ?? null;
+    $participante->data_nascimento = $request->data_nascimento ?? null;
+    $participante->idade = $request->idade ?? null;
+    $participante->sexo = $request->sexo ?? null;
     $participante->save();
 
     // Se veio de um evento específico, redireciona de volta para o evento
@@ -86,6 +90,10 @@ class ParticipantesController extends Controller
     $participante->telefone = $request->telefone ?? null;
     $participante->is_whatsapp = $request->has('is_whatsapp') ? 1 : 0;
     $participante->evento_id = $request->evento_id ?? null;
+    $participante->observacoes = $request->observacoes ?? null;
+    $participante->data_nascimento = $request->data_nascimento ?? null;
+    $participante->idade = $request->idade ?? null;
+    $participante->sexo = $request->sexo ?? null;
     $participante->save();
 
     return redirect('/participantes')->with('sucesso', 'Participante atualizado com sucesso!');

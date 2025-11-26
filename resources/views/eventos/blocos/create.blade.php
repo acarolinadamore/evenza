@@ -4,15 +4,16 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-4 mb-8">
+            <a href="{{ route('eventos.blocos.index', $evento) }}"
+               class="inline-flex items-center justify-center w-10 h-10 text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 focus:outline-none"
+               title="Voltar">
+                <i class="fas fa-chevron-left text-xl"></i>
+            </a>
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Novo Bloco de Conteúdo</h1>
                 <p class="text-gray-600 mt-1">{{ $evento->nome }}</p>
             </div>
-            <a href="{{ route('eventos.blocos.index', $evento) }}"
-               class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                <i class="fas fa-arrow-left mr-2"></i>Voltar
-            </a>
         </div>
 
         <!-- Formulário -->
@@ -28,14 +29,19 @@
                         Tipo de Bloco *
                     </label>
                     <select name="tipo" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Selecione o tipo...</option>
-                        <option value="hero">Hero - Seção principal de destaque</option>
-                        <option value="descricao">Descrição - Texto sobre o evento</option>
-                        <option value="agenda">Agenda - Programação do evento</option>
-                        <option value="banner">Banner - Imagem de destaque</option>
-                        <option value="mapa">Mapa - Localização</option>
-                        <option value="galeria">Galeria - Grade de fotos</option>
+                            style="
+                                background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23666%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e');
+                                background-repeat: no-repeat;
+                                background-position: right 0.75rem center;
+                                background-size: 1.2em;
+                                padding-right: 2.5rem;
+                            "
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none hover:border-gray-400 transition-colors cursor-pointer">
+                        <option value="" class="bg-white py-2 px-3">Selecione o tipo...</option>
+                        <option value="hero" class="bg-white py-2 px-3">Seção com imagem - Título, Imagem, texto</option>
+                        <option value="descricao" class="bg-white py-2 px-3">Seção sem imagem - Título e Texto</option>
+                        <option value="banner" class="bg-white py-2 px-3">Banner - Imagem de destaque</option>
+                        <option value="mapa" class="bg-white py-2 px-3">Mapa - Localização</option>
                     </select>
                 </div>
 
